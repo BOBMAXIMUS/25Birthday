@@ -1,16 +1,41 @@
-name: Action
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2 # Only works with v2
-      - uses: subosito/flutter-action@v1
-      - uses: bluefireteam/flutter-gh-pages@v7
+      # 1. Clonar el repositorio
+      - uses: actions/checkout@v2
+
+      # 2. Configurar Flutter
+      - uses: subosito/flutter-action@v2
         with:
-          baseHref: /25Birthday/
+          channel: stable
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4. Construir la aplicación Flutter Web
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href="/25Birthday/"
+
+      # 5. Publicar en GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: build/web/
+
+      - name: Finalizar despliegue
+        uses: actions/deploy-pages@v2
