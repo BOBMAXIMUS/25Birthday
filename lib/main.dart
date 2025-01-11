@@ -87,8 +87,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               children: [
                 getGifRow('gif1', 'gif2'),
                 getGifRow('gif3', 'gif4'),
-                !kIsWeb ? getGifRow('gif1', 'gif2') : SizedBox.shrink(),
-                !kIsWeb ? getGifRow('gif3', 'gif4') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <800 ? getGifRow('gif1', 'gif2') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <800 ? getGifRow('gif3', 'gif4') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <600 ? getGifRow('gif1', 'gif2') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <600 ? getGifRow('gif3', 'gif4') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <400 ? getGifRow('gif1', 'gif2') : SizedBox.shrink(),
+                MediaQuery.of(context).size.shortestSide <400 ? getGifRow('gif3', 'gif4') : SizedBox.shrink(),
+                
               ],
             ),
           ),
