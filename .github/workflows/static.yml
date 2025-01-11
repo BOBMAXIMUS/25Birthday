@@ -2,14 +2,14 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    # Update branch according from where you will be pushing the code
+    # Actualiza la rama de la cual se realizará el push
     branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      my_secret: ${{secrets.ACCESS_TOKEN}}
+      my_secret: ${{ secrets.ACCESS_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -22,28 +22,23 @@ jobs:
       - run: flutter build web --release
 
       - run: |
-          cd build
-          mkdir web-deploy
-          cd web-deploy
-          #! Update with your Email ID associated with GitHub
-          git config --global user.email <email ID>
-          #! Update with your username associated with GitHub
-          git config --global user.name <username>
+          cd build/web
+          mkdir ../web-deploy
+          cd ../web-deploy
+          # Configuración de Git
+          git config --global user.email "tu-email@example.com"
+          git config --global user.name "tu-username"
           git config --global init.defaultBranch main
           git init
-          # the repository to push the deploy into
-          #! Update the following with your username and repository
-          git remote add origin https://${{secrets.ACCESS_TOKEN}}@github.com/<username>/<repository>.git
-          git fetch origin gh-pages
-          git switch gh-pages
-          # copy the build that is there in ROOT/build/web into ROOT/build/web-deploy
+          # Repositorio remoto
+          git remote add origin https://${{ secrets.ACCESS_TOKEN }}@github.com/tu-username/tu-repo.git
+          git fetch origin gh-pages || git switch -c gh-pages
+          git checkout gh-pages || git checkout -b gh-pages
+          # Copiar los archivos generados
           cp -R ../web/* .
           git status
           git add .
-          # add commit of the previous commit from main
-          echo ""
+          # Usar el mensaje del último commit en la rama principal
           echo "Committing to gh-pages: ${{ github.event.head_commit.message }}"
-          echo ""
           git commit -m "${{ github.event.head_commit.message }}"
-          git push origin gh-pages
-          
+          git push origin gh-pages --force
