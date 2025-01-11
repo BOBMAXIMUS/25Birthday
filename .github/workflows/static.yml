@@ -2,43 +2,41 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    # Actualiza la rama de la cual se realizará el push
-    branches: [ main ]
+    branches:
+      - master
 
-jobs:
-  build:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Deploy to the github-pages environment
+
+
+jobs:  
+  build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      my_secret: ${{ secrets.ACCESS_TOKEN }}
-
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{env.working-directory}}
+      - name: Build web app
+        run: flutter build web
+        working-directory: ${{env.working-directory}}
 
-      - run: flutter clean
-      - run: flutter pub get
-      - run: flutter build web --release
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: build/web/
 
-      - run: |
-          cd build/web
-          mkdir ../web-deploy
-          cd ../web-deploy
-          # Configuración de Git
-          git config --global user.email "tu-email@example.com"
-          git config --global user.name "tu-username"
-          git config --global init.defaultBranch main
-          git init
-          # Repositorio remoto
-          git remote add origin https://${{ secrets.ACCESS_TOKEN }}@github.com/tu-username/tu-repo.git
-          git fetch origin gh-pages || git switch -c gh-pages
-          git checkout gh-pages || git checkout -b gh-pages
-          # Copiar los archivos generados
-          cp -R ../web/* .
-          git status
-          git add .
-          # Usar el mensaje del último commit en la rama principal
-          echo "Committing to gh-pages: ${{ github.event.head_commit.message }}"
-          git commit -m "${{ github.event.head_commit.message }}"
-          git push origin gh-pages --force
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
