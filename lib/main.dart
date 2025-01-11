@@ -51,13 +51,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   getImage(String image, [BoxFit? fit]) => Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('images/$image.png'),
-            fit: fit ?? BoxFit.cover,
-          ),
+    height: double.infinity,
+    width: double.infinity,
+    child: Image.asset(
+          'assets/images/$image.png',
+          fit: fit ?? BoxFit.cover,
         ),
-      );
+  );
   getGifRow(String image1, String image2) => Expanded(
         child: Row(
           children: [
