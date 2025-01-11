@@ -1,49 +1,49 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    # Update branch according from where you will be pushing the code
+    branches: [ main ]
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
+    env:
+      my_secret: ${{secrets.ACCESS_TOKEN}}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Pages
-        uses: actions/configure-pages@v3
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
+      - run: flutter clean
+      - run: flutter pub get
+      - run: flutter build web --release
 
-      - name: Build Flutter Web
-        run: flutter build web
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: build/web
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      - run: |
+          cd build
+          mkdir web-deploy
+          cd web-deploy
+          #! Update with your Email ID associated with GitHub
+          git config --global user.email <email ID>
+          #! Update with your username associated with GitHub
+          git config --global user.name <username>
+          git config --global init.defaultBranch main
+          git init
+          # the repository to push the deploy into
+          #! Update the following with your username and repository
+          git remote add origin https://${{secrets.ACCESS_TOKEN}}@github.com/<username>/<repository>.git
+          git fetch origin gh-pages
+          git switch gh-pages
+          # copy the build that is there in ROOT/build/web into ROOT/build/web-deploy
+          cp -R ../web/* .
+          git status
+          git add .
+          # add commit of the previous commit from main
+          echo ""
+          echo "Committing to gh-pages: ${{ github.event.head_commit.message }}"
+          echo ""
+          git commit -m "${{ github.event.head_commit.message }}"
+          git push origin gh-pages
+          
