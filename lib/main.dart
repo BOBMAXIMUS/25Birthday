@@ -30,11 +30,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final AudioPlayer _audioPlayer;
+  bool _isPlaying = false;
 
   @override
   void initState() {
     _audioPlayer = AudioPlayer();
-    _playAudio();
     _ctrl = AnimationController(
       duration: Duration(milliseconds: 10000),
       vsync: this,
@@ -48,11 +48,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
   }
 
-  Future<void> _playAudio() async {
-    await _audioPlayer.play(
-      volume: 0.05,
-      AssetSource('audio/recordatorio-memoria.mp3'),
-    );
+    Future<void> _toggleMusic() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+      setState(() {
+        _isPlaying = false;
+      });
+    } else {
+      await _audioPlayer.play(
+        AssetSource('audio/recordatorio-memoria.mp3'),
+        volume: 0.05,
+      );
+      setState(() {
+        _isPlaying = true;
+      });
+    }
   }
   @override
   void dispose() {
@@ -139,6 +149,33 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               front: getImage('img1', BoxFit.fill),
               back: getImage('img6'),
             ),
+          ),
+        ],
+      ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '¿Musiquita?',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          FloatingActionButton(
+            onPressed: _toggleMusic,
+            child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+            backgroundColor: Colors.green,
           ),
         ],
       ),
