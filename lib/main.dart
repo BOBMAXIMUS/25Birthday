@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cubixd/cubixd.dart';
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Birthday Cube',
+      title: 'Happy Birthday',
       theme: ThemeData.dark(),
       home: Home(),
     );
@@ -28,9 +29,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late final AnimationController _ctrl;
+  late final AudioPlayer _audioPlayer;
 
   @override
   void initState() {
+    _audioPlayer = AudioPlayer();
+    _playAudio();
     _ctrl = AnimationController(
       duration: Duration(milliseconds: 10000),
       vsync: this,
@@ -44,9 +48,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
   }
 
+  Future<void> _playAudio() async {
+    await _audioPlayer.play(
+      volume: 0.05,
+      AssetSource('audio/recordatorio-memoria.mp3'),
+    );
+  }
   @override
   void dispose() {
     _ctrl.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
